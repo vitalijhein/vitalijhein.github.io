@@ -1,0 +1,64 @@
+<script>
+  import mermaid from "mermaid";
+
+  const diagrams = Array.from(
+    document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]'),
+  );
+
+  if (diagrams.length > 0) {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: "base",
+      themeVariables: {
+        background: "#0a1727",
+        primaryColor: "#0d263d",
+        primaryTextColor: "#e9f0f7",
+        primaryBorderColor: "#41d8f5",
+        lineColor: "#9eabba",
+        secondaryColor: "#311b29",
+        tertiaryColor: "#07111f",
+        fontFamily: '"Avenir Next", Avenir, "Segoe UI", sans-serif',
+      },
+      flowchart: {
+        curve: "basis",
+        htmlLabels: false,
+      },
+    });
+
+    const pageTitle = document.querySelector("h1")?.textContent?.trim() ?? "case study";
+
+    for (const [index, sourceBlock] of diagrams.entries()) {
+      const source = sourceBlock.textContent?.trim();
+      if (!source) continue;
+
+      try {
+        const { svg } = await mermaid.render(`case-diagram-${index + 1}`, source);
+        const figure = document.createElement("figure");
+        figure.className = "mermaid-figure";
+
+        const rendered = document.createElement("div");
+        rendered.className = "mermaid-rendered";
+        rendered.innerHTML = svg;
+        const svgElement = rendered.querySelector("svg");
+        svgElement?.setAttribute("role", "img");
+        svgElement?.setAttribute("aria-label", `Diagram ${index + 1}: ${pageTitle}`);
+        figure.append(rendered);
+
+        const details = document.createElement("details");
+        details.className = "mermaid-source-details";
+        const summary = document.createElement("summary");
+        summary.textContent = "View diagram source";
+        details.append(summary);
+        sourceBlock.classList.add("mermaid-source");
+
+        sourceBlock.replaceWith(figure);
+        details.append(sourceBlock);
+        figure.append(details);
+      } catch (error) {
+        sourceBlock.dataset.renderState = "fallback";
+        console.warn("Mermaid diagram kept as source fallback", error);
+      }
+    }
+  }
+</script>

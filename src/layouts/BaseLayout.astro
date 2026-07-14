@@ -20,6 +20,7 @@ const personSchema = {
   "@id": "https://vitalijhein.github.io/#vitalij-hein",
   name: "Vitalij Hein",
   url: "https://vitalijhein.github.io/",
+  image: "https://vitalijhein.github.io/vitalij-hein-portrait.webp",
   jobTitle: "AI Engineer and Software Architect",
   description:
     "AI Engineer and Software Architect building production AI and software systems for difficult customer problems from discovery through delivery.",
@@ -63,9 +64,15 @@ const personSchema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content="https://vitalijhein.github.io/vitalij-hein-portrait.webp" />
+    <meta property="og:image:width" content="900" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="Portrait of Vitalij Hein" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://vitalijhein.github.io/vitalij-hein-portrait.webp" />
+    <meta name="twitter:image:alt" content="Portrait of Vitalij Hein" />
     <title>{title}</title>
     <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
   </head>

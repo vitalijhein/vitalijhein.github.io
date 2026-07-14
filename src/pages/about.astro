@@ -8,14 +8,28 @@ const description =
 
 <BaseLayout title={title} description={description} pageClass="about-page">
   <section class="page-intro">
-    <div class="shell">
-      <p class="eyebrow">About / Engineering profile</p>
-      <h1>I stay close to the system.</h1>
-      <p class="lead">
-        I am an AI Engineer and Software Architect who likes the whole problem:
-        understanding what a customer actually needs, choosing the architecture,
-        writing the software, proving that it works, and making the result usable by others.
-      </p>
+    <div class="shell about-intro-grid">
+      <div>
+        <p class="eyebrow">About / Engineering profile</p>
+        <h1>I stay close to the system.</h1>
+        <p class="lead">
+          I am an AI Engineer and Software Architect who likes the whole problem:
+          understanding what a customer actually needs, choosing the architecture,
+          writing the software, proving that it works, and making the result usable by others.
+        </p>
+      </div>
+
+      <figure class="profile-portrait">
+        <img
+          src="/vitalij-hein-portrait.webp"
+          alt="Vitalij Hein"
+          width="900"
+          height="1200"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption>Vitalij Hein / Augsburg, Germany</figcaption>
+      </figure>
     </div>
   </section>
 

@@ -1,0 +1,3 @@
+[submodule "vendor/engineering-case-studies"]
+	path = vendor/engineering-case-studies
+	url = https://github.com/vitalijhein/engineering-case-studies.git

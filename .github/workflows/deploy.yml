@@ -50,6 +50,13 @@ jobs:
           const pages = [
             ["dist/index.html", `${origin}/`, "index, follow"],
             ["dist/about/index.html", `${origin}/about/`, "index, follow"],
+            ["dist/work/index.html", `${origin}/work/`, "index, follow"],
+            ["dist/work/agentic-engineering-control-plane/index.html", `${origin}/work/agentic-engineering-control-plane/`, "index, follow"],
+            ["dist/work/secure-construction-knowledge-system/index.html", `${origin}/work/secure-construction-knowledge-system/`, "index, follow"],
+            ["dist/work/voice-agent-regression-testing/index.html", `${origin}/work/voice-agent-regression-testing/`, "index, follow"],
+            ["dist/work/csharp-rag-latency-engine/index.html", `${origin}/work/csharp-rag-latency-engine/`, "index, follow"],
+            ["dist/work/mirror-os/index.html", `${origin}/work/mirror-os/`, "index, follow"],
+            ["dist/work/content-engine/index.html", `${origin}/work/content-engine/`, "index, follow"],
             ["dist/404.html", `${origin}/404.html`, "noindex, follow"],
           ];
 
@@ -64,10 +71,14 @@ jobs:
             return `dist${path}`;
           }
 
-          function readTree(directory) {
+          function readTextTree(directory) {
+            const textExtensions = new Set([".css", ".html", ".js", ".json", ".map", ".svg", ".txt", ".xml"]);
             return fs.readdirSync(directory, {withFileTypes: true}).flatMap((entry) => {
               const path = `${directory}/${entry.name}`;
-              return entry.isDirectory() ? readTree(path) : [fs.readFileSync(path, "utf8")];
+              if (entry.isDirectory()) return readTextTree(path);
+              return textExtensions.has(path.slice(path.lastIndexOf(".")))
+                ? [fs.readFileSync(path, "utf8")]
+                : [];
             }).join("\n");
           }
 
@@ -111,13 +122,33 @@ jobs:
           assert(robots.includes(`${origin}/sitemap.xml`), "robots.txt has no sitemap");
 
           const sitemap = fs.readFileSync("dist/sitemap.xml", "utf8");
-          assert(sitemap.includes(`<loc>${origin}/</loc>`), "sitemap missing home");
-          assert(sitemap.includes(`<loc>${origin}/about/</loc>`), "sitemap missing About");
+          const indexedUrls = pages
+            .filter(([, , directive]) => directive === "index, follow")
+            .map(([, canonical]) => canonical)
+            .sort();
+          const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)]
+            .map(([, url]) => url)
+            .sort();
+          assert(JSON.stringify(sitemapUrls) === JSON.stringify(indexedUrls), "sitemap route set mismatch");
           assert(!sitemap.includes("404"), "sitemap must not include 404");
 
-          const artifact = readTree("dist");
+          const artifact = readTextTree("dist");
           const forbidden = /\/Users\/|127\.0\.0\.1|localhost|\b(?:TCT|Bitget|trading|salary|gehalt|bullshit|Festo)\b|(?:ghp_|github_pat_|sk-)[A-Za-z0-9_-]{16,}|(?:ANTHROPIC|OPENAI|AZURE|CEREBRAS)_API_KEY|client[_-]?secret|tenant[_-]?id/i;
           assert(!forbidden.test(artifact), "generated HTML contains a forbidden or private identifier");
+
+          const expectedSourceCommit = "febc84ad8be6ab39a925d2b29beff06d7b1fb83f";
+          const actualSourceCommit = require("node:child_process")
+            .execFileSync("git", ["-C", "vendor/engineering-case-studies", "rev-parse", "HEAD"], {encoding: "utf8"})
+            .trim();
+          assert(actualSourceCommit === expectedSourceCommit, "canonical case-study source commit drifted");
+
+          const sourceDirectory = "vendor/engineering-case-studies/case-studies";
+          const sourceFiles = fs.readdirSync(sourceDirectory).filter((name) => name.endsWith(".md"));
+          assert(sourceFiles.length === 6, "canonical case-study source count is not six");
+          for (const sourceFile of sourceFiles) {
+            const markdown = fs.readFileSync(`${sourceDirectory}/${sourceFile}`, "utf8");
+            assert(!/<(?:script|iframe|object|embed)\b|on[a-z]+\s*=/i.test(markdown), `${sourceFile}: unsafe raw markup`);
+          }
 
           console.log("Generated-site integrity checks passed.");
           NODE
@@ -129,6 +160,9 @@ jobs:
             "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/agentic-engineering-control-plane.md"
             "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/secure-construction-knowledge-system.md"
             "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/voice-agent-regression-testing.md"
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/csharp-rag-latency-engine.md"
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/mirror-os.md"
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/content-engine.md"
             "https://repositum.tuwien.at/handle/20.500.12708/188206"
             "https://github.com/vitalijhein"
           )
@@ -150,12 +184,23 @@ jobs:
             sleep 1
           done
 
-          for route in home about not-found; do
-            case "$route" in
-              home) url="http://127.0.0.1:4321/" ;;
-              about) url="http://127.0.0.1:4321/about/" ;;
-              not-found) url="http://127.0.0.1:4321/404.html" ;;
-            esac
+          routes=(
+            "home|/"
+            "about|/about/"
+            "work|/work/"
+            "agentic-engineering|/work/agentic-engineering-control-plane/"
+            "construction-knowledge|/work/secure-construction-knowledge-system/"
+            "voice-regression|/work/voice-agent-regression-testing/"
+            "csharp-rag|/work/csharp-rag-latency-engine/"
+            "mirror-os|/work/mirror-os/"
+            "content-engine|/work/content-engine/"
+            "not-found|/404.html"
+          )
+
+          for entry in "${routes[@]}"; do
+            route="${entry%%|*}"
+            path="${entry#*|}"
+            url="http://127.0.0.1:4321${path}"
             npx --yes lighthouse@13.4.0 "$url" \
               --only-categories=accessibility \
               --chrome-flags="--headless=new --no-sandbox --disable-gpu --disable-background-networking" \
@@ -167,7 +212,18 @@ jobs:
 
           node <<'NODE'
           const fs = require("node:fs");
-          for (const route of ["home", "about", "not-found"]) {
+          for (const route of [
+            "home",
+            "about",
+            "work",
+            "agentic-engineering",
+            "construction-knowledge",
+            "voice-regression",
+            "csharp-rag",
+            "mirror-os",
+            "content-engine",
+            "not-found",
+          ]) {
             const report = JSON.parse(fs.readFileSync(`/tmp/lighthouse-${route}.json`, "utf8"));
             const score = report.categories.accessibility.score;
             console.log(`${route}: accessibility ${Math.round(score * 100)}`);

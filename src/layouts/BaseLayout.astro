@@ -11,6 +11,7 @@ const { title, description, pageClass = "" } = Astro.props;
 const pathname = Astro.url.pathname;
 const isHome = pathname === "/";
 const isAbout = pathname.startsWith("/about");
+const isWork = pathname.startsWith("/work");
 const isNotFound = pathname.startsWith("/404");
 const canonicalUrl = new URL(isNotFound ? "/404.html" : pathname, Astro.site ?? Astro.url.origin);
 const robots = isNotFound ? "noindex, follow" : "index, follow";
@@ -88,7 +89,7 @@ const personSchema = {
 
         <nav class="site-nav" aria-label="Primary navigation">
           <a href="/" aria-current={isHome ? "page" : undefined}>Home</a>
-          <a href="/#systems">Systems</a>
+          <a href="/work/" aria-current={isWork ? "page" : undefined}>Work</a>
           <a href="/about/" aria-current={isAbout ? "page" : undefined}>About</a>
           <a
             class="nav-external"
@@ -118,9 +119,7 @@ const personSchema = {
         <div class="footer-links" aria-label="External links">
           <a href="https://www.linkedin.com/in/vitalijhein" target="_blank" rel="noreferrer">LinkedIn ↗</a>
           <a href="https://github.com/vitalijhein" target="_blank" rel="noreferrer">GitHub ↗</a>
-          <a href="https://github.com/vitalijhein/engineering-case-studies" target="_blank" rel="noreferrer">
-            Case studies ↗
-          </a>
+          <a href="/work/">Case studies →</a>
         </div>
 
         <p class="footer-note">AI engineering · software architecture · hands-on delivery</p>

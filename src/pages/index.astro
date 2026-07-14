@@ -13,7 +13,7 @@ const cases = [
     description:
       "Long-running engineering work across isolated Git worktrees, durable run state, verified dispatch, independent merged-diff review, and explicit human release authority.",
     stack: "Orchestration / verification",
-    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/agentic-engineering-control-plane.md",
+    href: "/work/agentic-engineering-control-plane/",
   },
   {
     number: "02",
@@ -22,7 +22,7 @@ const cases = [
     description:
       "An independently built knowledge system connecting Teams, SharePoint, Graph, Power Automate, Azure AI Search, Copilot Studio, and custom retrieval—with project isolation and authorization-aware answers.",
     stack: "Azure / retrieval / security",
-    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/secure-construction-knowledge-system.md",
+    href: "/work/secure-construction-knowledge-system/",
   },
   {
     number: "03",
@@ -31,7 +31,7 @@ const cases = [
     description:
       "A framework that reconstructs conversational paths, places real calls through Azure Communication Services, grades every turn, and separates product failures from missing test evidence.",
     stack: "Graphs / ACS / evaluation",
-    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/voice-agent-regression-testing.md",
+    href: "/work/voice-agent-regression-testing/",
   },
 ];
 
@@ -107,7 +107,7 @@ const methods = [
 
     <div class="case-grid">
       {cases.map((item) => (
-        <a class="case-card" href={item.href} target="_blank" rel="noreferrer">
+        <a class="case-card" href={item.href}>
           <div style="display:flex; align-items:center;">
             <p class="card-kicker">{item.kicker}</p>
             <span class="case-number">{item.number}</span>
@@ -116,7 +116,7 @@ const methods = [
           <p>{item.description}</p>
           <div class="card-footer">
             <span>{item.stack}</span>
-            <span>Read case ↗</span>
+            <span>Read case →</span>
           </div>
         </a>
       ))}

@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const title = "About | Vitalij Hein";
+const description =
+  "About Vitalij Hein: AI Engineer and Software Architect working across customer discovery, architecture, hands-on implementation, verification, and delivery.";
+---
+
+<BaseLayout title={title} description={description} pageClass="about-page">
+  <section class="page-intro">
+    <div class="shell">
+      <p class="eyebrow">About / Engineering profile</p>
+      <h1>I stay close to the system.</h1>
+      <p class="lead">
+        I am an AI Engineer and Software Architect who likes the whole problem:
+        understanding what a customer actually needs, choosing the architecture,
+        writing the software, proving that it works, and making the result usable by others.
+      </p>
+    </div>
+  </section>
+
+  <section class="shell section">
+    <div class="about-grid">
+      <div class="about-block">
+        <p class="meta-label">Current role</p>
+        <h2>From consulting context to production system</h2>
+      </div>
+      <div class="about-block">
+        <p>
+          At Cluster Dynamics Reply, I work as an AI Architect & Engineer on
+          enterprise systems. My responsibility commonly spans discovery,
+          requirements, solution architecture, implementation, cloud integration,
+          testing, stakeholder communication, and handover.
+        </p>
+        <p>
+          At one client, I served as the technical expert for an AI workstream:
+          setting direction, coordinating the work of five contributors, and
+          supplying the engineering knowledge they needed. That leadership work is
+          distinct from projects such as the secure construction knowledge system,
+          which I conceived and delivered independently.
+        </p>
+      </div>
+
+      <div class="about-block">
+        <p class="meta-label">Engineering profile</p>
+        <h2>AI systems built on software fundamentals</h2>
+      </div>
+      <div class="about-block">
+        <p>
+          My work is AI-focused, but not AI-only. I have developed software since
+          2017 and work across Python, C#, backend services, APIs, retrieval systems,
+          automated testing, data flows, and Azure cloud integration. The model is
+          one component; the surrounding software determines whether the system can
+          be trusted in production.
+        </p>
+        <ul class="principles">
+          <li>Make boundaries and failure modes explicit.</li>
+          <li>Prefer evidence from real system behavior over demo confidence.</li>
+          <li>Use the simplest architecture that meets the actual constraints.</li>
+          <li>Keep technical decisions explainable to customers and teams.</li>
+        </ul>
+      </div>
+
+      <div class="about-block">
+        <p class="meta-label">Agentic Engineering</p>
+        <h2>Controlled leverage, not autonomous theater</h2>
+      </div>
+      <div class="about-block">
+        <p>
+          I design agentic delivery systems as engineering infrastructure:
+          bounded context, isolated workspaces, explicit state, task-aware model
+          routing, automated gates, independent review, and human ownership of
+          scope and release decisions. This lets me explore and implement quickly
+          without lowering the standard of evidence required from the result.
+        </p>
+        <p>
+          The important capability is not producing more code. It is making better
+          decisions across more of the delivery path while remaining accountable
+          for what reaches production.
+        </p>
+      </div>
+
+      <div class="about-block research-note">
+        <p class="meta-label">Research & recognition</p>
+        <h2>Model engineering before the current wave</h2>
+      </div>
+      <div class="about-block">
+        <p>
+          For my TU Wien diploma thesis, I fine-tuned specialized BERT, RoBERTa,
+          and OPT variants for 18 propaganda techniques and combined them with a
+          meta-classifier. The system improved Micro-F1 from a 0.54 baseline to
+          0.78. I was also part of the Reply and Riverty team that won the
+          Microsoft AI Challenge 2025 with a self-correcting customer-service workflow.
+        </p>
+        <div class="actions">
+          <a class="button" href="https://repositum.tuwien.at/handle/20.500.12708/188206" target="_blank" rel="noreferrer">
+            Read the thesis ↗
+          </a>
+          <a class="button" href="https://github.com/vitalijhein/engineering-case-studies" target="_blank" rel="noreferrer">
+            Explore case studies ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section closing">
+    <div class="shell">
+      <p class="eyebrow">Difficult problem? Good.</p>
+      <h2>Bring me into the technical conversation.</h2>
+      <p>
+        I am most useful where customer context, architecture, and hands-on
+        engineering have to meet.
+      </p>
+      <div class="actions">
+        <a class="button button-primary" href="https://www.linkedin.com/in/vitalijhein" target="_blank" rel="noreferrer">
+          Connect on LinkedIn ↗
+        </a>
+        <a class="button" href="mailto:vitalijhein@googlemail.com">Write an email</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

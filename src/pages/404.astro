@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const title = "Page not found | Vitalij Hein";
+const description = "The requested page could not be found.";
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="shell not-found">
+    <div>
+      <p class="eyebrow">Route / not found</p>
+      <h1>404</h1>
+      <p>
+        This path does not lead to a production system. Return home or go
+        directly to the technical case studies.
+      </p>
+      <div class="actions">
+        <a class="button button-primary" href="/">Return home</a>
+        <a class="button" href="https://github.com/vitalijhein/engineering-case-studies" target="_blank" rel="noreferrer">
+          View case studies ↗
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

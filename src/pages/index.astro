@@ -1,26 +1,204 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
 const title = "Vitalij Hein | AI Engineer and Software Architect";
 const description =
   "AI Engineer and Software Architect building production AI and software systems for difficult customer problems from discovery through delivery.";
+
+const cases = [
+  {
+    number: "01",
+    kicker: "Agentic engineering",
+    title: "A control plane for multi-agent delivery",
+    description:
+      "Long-running engineering work across isolated Git worktrees, durable run state, verified dispatch, independent merged-diff review, and explicit human release authority.",
+    stack: "Orchestration / verification",
+    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/agentic-engineering-control-plane.md",
+  },
+  {
+    number: "02",
+    kicker: "Enterprise knowledge",
+    title: "Secure project intelligence for construction",
+    description:
+      "An independently built knowledge system connecting Teams, SharePoint, Graph, Power Automate, Azure AI Search, Copilot Studio, and custom retrieval—with project isolation and authorization-aware answers.",
+    stack: "Azure / retrieval / security",
+    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/secure-construction-knowledge-system.md",
+  },
+  {
+    number: "03",
+    kicker: "Voice systems",
+    title: "Regression testing for production voice agents",
+    description:
+      "A framework that reconstructs conversational paths, places real calls through Azure Communication Services, grades every turn, and separates product failures from missing test evidence.",
+    stack: "Graphs / ACS / evaluation",
+    href: "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/voice-agent-regression-testing.md",
+  },
+];
+
+const methods = [
+  ["01", "Turn ambiguity into requirements", "I reduce an unclear customer problem into explicit decisions, boundaries, risks, and evidence of success."],
+  ["02", "Connect architecture to implementation", "I stay hands-on from system design through backend code, cloud integration, and the uncomfortable edge cases."],
+  ["03", "Verify at the real boundary", "I test the behavior users and dependent systems actually experience—not only the helper function that is easy to make green."],
+  ["04", "Make the system transferable", "I explain trade-offs, align stakeholders, document decisions, and leave teams able to operate what was built."],
+];
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
-  </head>
-  <body>
-    <main>
-      <p>Vitalij Hein / AI Engineer and Software Architect</p>
+<BaseLayout title={title} description={description}>
+  <section class="shell hero">
+    <div>
+      <p class="eyebrow">Vitalij Hein / AI Engineer and Software Architect</p>
       <h1>Give me the difficult problem.</h1>
-      <p>
+      <p class="hero-copy">
         I build production AI and software systems for difficult customer
         problems, from discovery and architecture to hands-on implementation,
         verification, and delivery.
       </p>
-    </main>
-  </body>
-</html>
+      <div class="actions">
+        <a class="button button-primary" href="#systems">Explore the systems ↓</a>
+        <a class="button" href="https://www.linkedin.com/in/vitalijhein" target="_blank" rel="noreferrer">
+          Connect on LinkedIn ↗
+        </a>
+      </div>
+    </div>
+
+    <div class="system-map" aria-hidden="true">
+      <span class="map-caption">System / delivery path</span>
+      <span class="map-node node-problem">Problem</span>
+      <span class="map-node node-architecture">Architecture</span>
+      <span class="map-node node-engineering">Engineering</span>
+      <span class="map-node node-verification">Verification</span>
+      <span class="map-node node-delivery">Production</span>
+    </div>
+  </section>
+
+  <section class="proof-band" aria-label="Selected evidence">
+    <div class="shell proof-grid">
+      <div class="proof-item">
+        <p class="proof-label">Foundation</p>
+        <p class="proof-value">Software development since 2017</p>
+      </div>
+      <div class="proof-item">
+        <p class="proof-label">Recognition</p>
+        <p class="proof-value">Microsoft AI Challenge 2025 · winning team</p>
+      </div>
+      <div class="proof-item">
+        <p class="proof-label">Evidence</p>
+        <p class="proof-value">Six technical case studies</p>
+      </div>
+      <div class="proof-item">
+        <p class="proof-label">Research</p>
+        <p class="proof-value">Dipl.-Ing. · TU Wien</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell section" id="systems">
+    <div class="section-heading">
+      <p class="section-index">01 / Selected systems</p>
+      <div>
+        <h2>Evidence from systems that had to work.</h2>
+        <p>
+          Three examples spanning agentic engineering, enterprise retrieval,
+          and automated voice-agent testing. Each case study covers the
+          problem, architecture, implementation, and engineering decisions.
+        </p>
+      </div>
+    </div>
+
+    <div class="case-grid">
+      {cases.map((item) => (
+        <a class="case-card" href={item.href} target="_blank" rel="noreferrer">
+          <div style="display:flex; align-items:center;">
+            <p class="card-kicker">{item.kicker}</p>
+            <span class="case-number">{item.number}</span>
+          </div>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+          <div class="card-footer">
+            <span>{item.stack}</span>
+            <span>Read case ↗</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section">
+    <div class="section-heading">
+      <p class="section-index">02 / How I work</p>
+      <div>
+        <h2>Own the path from ambiguity to production.</h2>
+        <p>
+          Agentic Engineering increases my leverage. It does not replace
+          architecture, judgment, real verification, or responsibility for the result.
+        </p>
+      </div>
+    </div>
+
+    <div class="method-grid">
+      {methods.map(([number, heading, copy]) => (
+        <div class="method-item">
+          <strong>{number}</strong>
+          <div>
+            <h3>{heading}</h3>
+            <p>{copy}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section">
+    <div class="section-heading">
+      <p class="section-index">03 / Background</p>
+      <div>
+        <h2>Engineering depth with customer responsibility.</h2>
+      </div>
+    </div>
+
+    <div class="background-grid">
+      <article class="background-card">
+        <p class="meta-label">Current work</p>
+        <h3>AI Architect & Engineer at Cluster Dynamics Reply</h3>
+        <p>
+          I own enterprise AI initiatives from customer discovery and architecture
+          through implementation, technical decisions, stakeholder communication,
+          and delivery. At one client, I led the technical direction of an AI
+          workstream and enabled five contributors; separately, I also deliver
+          complex systems independently.
+        </p>
+        <a href="/about/">More about my background →</a>
+      </article>
+
+      <article class="background-card research-note">
+        <p class="meta-label">Research</p>
+        <h3>Fine-tuning and meta-classification at TU Wien</h3>
+        <p>
+          My diploma thesis combined specialized transformer models through model
+          stacking to detect 18 propaganda techniques, improving Micro-F1 from a
+          0.54 baseline to 0.78.
+        </p>
+        <a href="https://repositum.tuwien.at/handle/20.500.12708/188206" target="_blank" rel="noreferrer">
+          Read the thesis ↗
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <section class="section closing">
+    <div class="shell">
+      <p class="eyebrow">Architecture is useful when it survives contact with production.</p>
+      <h2>Let’s build the thing that has to work.</h2>
+      <p>
+        If you are hiring for difficult AI or software systems—and want someone
+        who can advise, build, verify, and explain them—I would like to talk.
+      </p>
+      <div class="actions">
+        <a class="button button-primary" href="https://www.linkedin.com/in/vitalijhein" target="_blank" rel="noreferrer">
+          Connect on LinkedIn ↗
+        </a>
+        <a class="button" href="mailto:vitalijhein@googlemail.com">Write an email</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

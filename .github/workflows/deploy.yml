@@ -1,0 +1,198 @@
+name: Validate and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting and types
+        run: |
+          npm run format:check
+          npm run check
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Validate metadata, schema, routes, and privacy
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+
+          const origin = "https://vitalijhein.github.io";
+          const pages = [
+            ["dist/index.html", `${origin}/`, "index, follow"],
+            ["dist/about/index.html", `${origin}/about/`, "index, follow"],
+            ["dist/404.html", `${origin}/404.html`, "noindex, follow"],
+          ];
+
+          function assert(condition, message) {
+            if (!condition) throw new Error(message);
+          }
+
+          function artifactPath(href) {
+            const path = href.split("#", 1)[0].split("?", 1)[0];
+            if (path === "" || path === "/") return "dist/index.html";
+            if (path.endsWith("/")) return `dist${path}index.html`;
+            return `dist${path}`;
+          }
+
+          function readTree(directory) {
+            return fs.readdirSync(directory, {withFileTypes: true}).flatMap((entry) => {
+              const path = `${directory}/${entry.name}`;
+              return entry.isDirectory() ? readTree(path) : [fs.readFileSync(path, "utf8")];
+            }).join("\n");
+          }
+
+          for (const [file, canonical, robots] of pages) {
+            const html = fs.readFileSync(file, "utf8");
+            assert(html.includes('<html lang="en">'), `${file}: missing language`);
+            assert(html.includes('<main id="main-content">'), `${file}: missing main landmark`);
+            assert(html.includes(`<link rel="canonical" href="${canonical}">`), `${file}: bad canonical`);
+            assert(html.includes(`<meta property="og:url" content="${canonical}">`), `${file}: bad OG URL`);
+            assert(html.includes(`<meta name="robots" content="${robots}">`), `${file}: bad robots directive`);
+            assert(/<meta name="description" content="[^"]+">/.test(html), `${file}: missing description`);
+            assert(/<meta property="og:title" content="[^"]+">/.test(html), `${file}: missing OG title`);
+            assert(/<meta property="og:description" content="[^"]+">/.test(html), `${file}: missing OG description`);
+
+            const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+            assert(match, `${file}: missing Person JSON-LD`);
+            const schema = JSON.parse(match[1]);
+            assert(schema["@type"] === "Person", `${file}: schema is not Person`);
+            assert(schema.name === "Vitalij Hein", `${file}: schema name mismatch`);
+            assert(schema.jobTitle === "AI Engineer and Software Architect", `${file}: schema title mismatch`);
+            assert(schema.worksFor?.name === "Reply", `${file}: schema employer mismatch`);
+            assert(schema.alumniOf?.name === "TU Wien", `${file}: schema education mismatch`);
+            assert(JSON.stringify(schema.sameAs) === JSON.stringify([
+              "https://www.linkedin.com/in/vitalijhein",
+              "https://github.com/vitalijhein",
+            ]), `${file}: schema sameAs mismatch`);
+
+            for (const [, href] of html.matchAll(/href="([^"]+)"/g)) {
+              if (href.startsWith("http") || href.startsWith("mailto:")) continue;
+              assert(href.startsWith("/") || href.startsWith("#"), `${file}: invalid relative link ${href}`);
+              if (href.startsWith("#")) {
+                assert(html.includes(`id="${href.slice(1)}"`), `${file}: missing anchor ${href}`);
+                continue;
+              }
+              assert(fs.existsSync(artifactPath(href)), `${file}: broken internal link ${href}`);
+            }
+          }
+
+          const robots = fs.readFileSync("dist/robots.txt", "utf8");
+          assert(robots.includes("Allow: /"), "robots.txt is not indexable");
+          assert(robots.includes(`${origin}/sitemap.xml`), "robots.txt has no sitemap");
+
+          const sitemap = fs.readFileSync("dist/sitemap.xml", "utf8");
+          assert(sitemap.includes(`<loc>${origin}/</loc>`), "sitemap missing home");
+          assert(sitemap.includes(`<loc>${origin}/about/</loc>`), "sitemap missing About");
+          assert(!sitemap.includes("404"), "sitemap must not include 404");
+
+          const artifact = readTree("dist");
+          const forbidden = /\/Users\/|127\.0\.0\.1|localhost|\b(?:TCT|Bitget|trading|salary|gehalt|bullshit|Festo)\b|(?:ghp_|github_pat_|sk-)[A-Za-z0-9_-]{16,}|(?:ANTHROPIC|OPENAI|AZURE|CEREBRAS)_API_KEY|client[_-]?secret|tenant[_-]?id/i;
+          assert(!forbidden.test(artifact), "generated HTML contains a forbidden or private identifier");
+
+          console.log("Generated-site integrity checks passed.");
+          NODE
+
+      - name: Verify external evidence links
+        shell: bash
+        run: |
+          urls=(
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/agentic-engineering-control-plane.md"
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/secure-construction-knowledge-system.md"
+            "https://github.com/vitalijhein/engineering-case-studies/blob/main/case-studies/voice-agent-regression-testing.md"
+            "https://repositum.tuwien.at/handle/20.500.12708/188206"
+            "https://github.com/vitalijhein"
+          )
+          for url in "${urls[@]}"; do
+            curl --fail --location --silent --show-error --retry 2 --output /dev/null "$url"
+          done
+
+      - name: Run accessibility audit
+        shell: bash
+        run: |
+          npm run preview -- --host 127.0.0.1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:4321/; then
+              break
+            fi
+            sleep 1
+          done
+
+          for route in home about not-found; do
+            case "$route" in
+              home) url="http://127.0.0.1:4321/" ;;
+              about) url="http://127.0.0.1:4321/about/" ;;
+              not-found) url="http://127.0.0.1:4321/404.html" ;;
+            esac
+            npx --yes lighthouse@13.4.0 "$url" \
+              --only-categories=accessibility \
+              --chrome-flags="--headless=new --no-sandbox --disable-gpu --disable-background-networking" \
+              --max-wait-for-load=15000 \
+              --output=json \
+              --output-path="/tmp/lighthouse-$route.json" \
+              --quiet
+          done
+
+          node <<'NODE'
+          const fs = require("node:fs");
+          for (const route of ["home", "about", "not-found"]) {
+            const report = JSON.parse(fs.readFileSync(`/tmp/lighthouse-${route}.json`, "utf8"));
+            const score = report.categories.accessibility.score;
+            console.log(`${route}: accessibility ${Math.round(score * 100)}`);
+            if (score < 0.95) throw new Error(`${route}: accessibility score below 95`);
+
+            const blocking = report.categories.accessibility.auditRefs
+              .map(({id}) => report.audits[id])
+              .filter((audit) => audit.score === 0)
+              .filter((audit) => ["serious", "critical"].includes(audit.details?.debugData?.impact));
+            if (blocking.length > 0) {
+              throw new Error(`${route}: blocking accessibility findings: ${blocking.map(({id}) => id).join(", ")}`);
+            }
+          }
+          NODE
+
+      - name: Build and upload Pages artifact
+        uses: withastro/action@v6
+        with:
+          node-version: 24
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

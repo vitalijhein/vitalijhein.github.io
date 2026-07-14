@@ -11,6 +11,41 @@ const { title, description, pageClass = "" } = Astro.props;
 const pathname = Astro.url.pathname;
 const isHome = pathname === "/";
 const isAbout = pathname.startsWith("/about");
+const isNotFound = pathname.startsWith("/404");
+const canonicalUrl = new URL(isNotFound ? "/404.html" : pathname, Astro.site ?? Astro.url.origin);
+const robots = isNotFound ? "noindex, follow" : "index, follow";
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://vitalijhein.github.io/#vitalij-hein",
+  name: "Vitalij Hein",
+  url: "https://vitalijhein.github.io/",
+  jobTitle: "AI Engineer and Software Architect",
+  description:
+    "AI Engineer and Software Architect building production AI and software systems for difficult customer problems from discovery through delivery.",
+  worksFor: {
+    "@type": "Organization",
+    name: "Reply",
+  },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "TU Wien",
+  },
+  knowsAbout: [
+    "AI engineering",
+    "Software architecture",
+    "Agentic Engineering",
+    "Microsoft Azure",
+    "Python",
+    "C#",
+    "Retrieval systems",
+    "Automated software testing",
+  ],
+  sameAs: [
+    "https://www.linkedin.com/in/vitalijhein",
+    "https://github.com/vitalijhein",
+  ],
+};
 ---
 
 <!doctype html>
@@ -19,15 +54,27 @@ const isAbout = pathname.startsWith("/about");
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
     <meta name="theme-color" content="#07111f" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vitalij Hein" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <title>{title}</title>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
   </head>
   <body class={pageClass}>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <header class="site-header">
       <div class="shell header-inner">
-        <a class="wordmark" href="/" aria-label="Vitalij Hein, home">
+        <a class="wordmark" href="/" aria-label="VH, Vitalij Hein, home">
           <span class="wordmark-mark" aria-hidden="true">VH</span>
           <span>Vitalij Hein</span>
         </a>

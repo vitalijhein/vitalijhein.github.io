@@ -65,7 +65,12 @@ function normalizeMarkdown(value: string): string {
     .trim();
 }
 
-function extract(body: string, pattern: RegExp, label: string, slug: string): string {
+function extract(
+  body: string,
+  pattern: RegExp,
+  label: string,
+  slug: string,
+): string {
   const value = body.match(pattern)?.[1];
   if (!value) throw new Error(`Canonical case ${slug} is missing ${label}`);
   return normalizeMarkdown(value);
@@ -73,7 +78,9 @@ function extract(body: string, pattern: RegExp, label: string, slug: string): st
 
 function assertSlug(id: string): asserts id is CaseSlug {
   if (!(id in casePresentation)) {
-    throw new Error(`Canonical case ${id} has no website presentation metadata`);
+    throw new Error(
+      `Canonical case ${id} has no website presentation metadata`,
+    );
   }
 }
 
@@ -81,7 +88,12 @@ export function getCaseMeta(entry: CaseEntry) {
   assertSlug(entry.id);
   const body = entry.body ?? "";
   const title = extract(body, /^#\s+(.+)$/m, "an H1 title", entry.id);
-  const summary = extract(body, /^\*\*([\s\S]*?)\*\*\s*$/m, "a summary deck", entry.id);
+  const summary = extract(
+    body,
+    /^\*\*([\s\S]*?)\*\*\s*$/m,
+    "a summary deck",
+    entry.id,
+  );
   const role = extract(
     body,
     /^- \*\*Role:\*\*\s*([\s\S]*?)(?=\n- \*\*|\n\n)/m,
@@ -89,7 +101,8 @@ export function getCaseMeta(entry: CaseEntry) {
     entry.id,
   );
   const presentation = casePresentation[entry.id];
-  const description = summary.length > 157 ? `${summary.slice(0, 154).trimEnd()}…` : summary;
+  const description =
+    summary.length > 157 ? `${summary.slice(0, 154).trimEnd()}…` : summary;
 
   return {
     slug: entry.id,

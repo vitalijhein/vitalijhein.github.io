@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+
+import { getOrderedCases } from "../../data/caseStudies";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const cases = getOrderedCases(await getCollection("cases"));
+const title = "Engineering Case Studies | Vitalij Hein";
+const description =
+  "Six detailed engineering case studies spanning agentic delivery, enterprise retrieval, voice-agent testing, C# latency, personal data systems, and content operations.";
+---
+
+<BaseLayout title={title} description={description} pageClass="work-index-page">
+  <section class="page-intro work-intro">
+    <div class="shell">
+      <p class="eyebrow">Work / Six canonical case studies</p>
+      <h1>Systems, decisions, and the evidence behind them.</h1>
+      <p class="lead">
+        These are engineering accounts, not project thumbnails. Each case follows
+        a difficult problem through architecture, implementation boundaries,
+        verification, and the principles that transfer to the next system.
+      </p>
+    </div>
+  </section>
+
+  <section class="shell section" aria-labelledby="case-study-list">
+    <div class="section-heading">
+      <p class="section-index">01 / Full evidence set</p>
+      <div>
+        <h2 id="case-study-list">Choose the problem, then inspect the system.</h2>
+        <p>
+          The technical bodies are loaded directly from the pinned public
+          case-study repository. This site owns only their presentation.
+        </p>
+      </div>
+    </div>
+
+    <div class="work-grid">
+      {cases.map(({ meta }) => (
+        <a class:list={["work-card", `accent-${meta.accent}`]} href={`/work/${meta.slug}/`}>
+          <div class="work-card-topline">
+            <p class="card-kicker">{meta.category}</p>
+            <span class="case-number">{meta.number}</span>
+          </div>
+          <h3>{meta.title}</h3>
+          <p>{meta.summary}</p>
+          <ul class="tag-list" aria-label="Capabilities">
+            {meta.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+          <div class="card-footer">
+            <span>{meta.shortLabel}</span>
+            <span>Read case →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

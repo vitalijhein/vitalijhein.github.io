@@ -1,0 +1,64 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+
+import { getCaseMeta, getOrderedCases } from "../../data/caseStudies";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  return getOrderedCases(await getCollection("cases")).map(({ entry }) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<"cases">;
+}
+
+const { entry } = Astro.props;
+const meta = getCaseMeta(entry);
+const { Content, headings } = await render(entry);
+const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
+---
+
+<BaseLayout
+  title={`${meta.title} | Vitalij Hein`}
+  description={meta.description}
+  pageClass="case-reader-page"
+>
+  <header class="case-reader-header">
+    <div class="shell case-reader-meta">
+      <a class="back-link" href="/work/">← All case studies</a>
+      <p class="eyebrow">{meta.number} / {meta.category}</p>
+      <ul class="tag-list" aria-label="Capabilities">
+        {meta.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+      <a class="source-link" href={meta.sourceUrl} target="_blank" rel="noreferrer">
+        Canonical source on GitHub ↗
+      </a>
+    </div>
+  </header>
+
+  <div class="shell case-reader-layout">
+    <aside class="case-toc" aria-label="On this page">
+      <p class="meta-label">On this page</p>
+      <ol>
+        {toc.map((heading) => (
+          <li class:list={[heading.depth === 3 && "toc-nested"]}>
+            <a href={`#${heading.slug}`}>{heading.text}</a>
+          </li>
+        ))}
+      </ol>
+    </aside>
+
+    <article class="case-prose">
+      <Content />
+      <footer class="case-source-footer">
+        <p>This case study is maintained in the canonical public evidence repository.</p>
+        <a class="button" href={meta.sourceUrl} target="_blank" rel="noreferrer">
+          Inspect source history ↗
+        </a>
+      </footer>
+    </article>
+  </div>
+</BaseLayout>

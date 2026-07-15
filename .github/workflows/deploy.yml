@@ -136,7 +136,7 @@ jobs:
           const forbidden = /\/Users\/|127\.0\.0\.1|localhost|\b(?:TCT|Bitget|trading|salary|gehalt|bullshit|Festo)\b|(?:ghp_|github_pat_|sk-)[A-Za-z0-9_-]{16,}|(?:ANTHROPIC|OPENAI|AZURE|CEREBRAS)_API_KEY|client[_-]?secret|tenant[_-]?id/i;
           assert(!forbidden.test(artifact), "generated HTML contains a forbidden or private identifier");
 
-          const expectedSourceCommit = "febc84ad8be6ab39a925d2b29beff06d7b1fb83f";
+          const expectedSourceCommit = "a5edbdbe3d188c902b4747809b30d612b7fcf903";
           const actualSourceCommit = require("node:child_process")
             .execFileSync("git", ["-C", "vendor/engineering-case-studies", "rev-parse", "HEAD"], {encoding: "utf8"})
             .trim();

@@ -1,0 +1,732 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const title = "The Digest Boundary | Vitalij Hein";
+const description =
+  "A field guide for choosing between private cached hashes, Content IDs, Merkle repair indexes, authenticated trees, revisions, and no digest at all.";
+
+const decisions = [
+  {
+    number: "01",
+    href: "#object-ownership",
+    title: "Object ownership",
+    summary: "Decide whether a hash is domain state, a private cache, or technical identity.",
+  },
+  {
+    number: "02",
+    href: "#different-contracts",
+    title: "Mechanism",
+    summary: "Separate annotations, Content IDs, commitments, and authenticated proofs.",
+  },
+  {
+    number: "03",
+    href: "#stable-protocol",
+    title: "Protocol",
+    summary: "Specify canonicalization, verification, migration, and privacy.",
+  },
+  {
+    number: "04",
+    href: "#architecture-choice",
+    title: "Architecture",
+    summary: "Choose the smallest mechanism that carries the required guarantee.",
+  },
+];
+
+const contractItems = [
+  ["Purpose", "Cache, Content ID, validator, proof root, repair index, or another named job."],
+  ["Subject", "Exact bytes, a representation, a domain value, node, tree, graph, or snapshot."],
+  ["Canonicalization", "Rules for numbers, Unicode, ordering, nulls, defaults, unknown fields, and timestamps."],
+  ["Structure", "Child order, position, tree shape, chunking, empty values, and self-reference."],
+  ["Domain binding", "Type, schema, protocol purpose, and version."],
+  ["Separation", "Distinct leaf and internal-node domains where the structure requires it."],
+  ["Algorithm", "Explicit algorithm identifier and digest length."],
+  ["Verification", "Recompute from the actual accepted data and compare under the declared contract."],
+  ["Failure", "Reject, trusted recompute, or explicit unknown for missing and unverifiable values."],
+  ["Migration", "Coexistence, translation, readdressing, index rebuilds, rollback, and garbage collection."],
+  ["Privacy", "Visibility, equality leakage, content entropy, access, and confirmation attacks."],
+  ["Conformance", "Cross-language positive and negative vectors through the real producer-consumer path."],
+];
+---
+
+<BaseLayout title={title} description={description} pageClass="writing-page">
+  <article class="writing-article">
+    <header class="writing-hero">
+      <div class="shell">
+        <p class="eyebrow">Architecture field guide / Current through 2026-07-16</p>
+        <h1>The Digest Boundary</h1>
+        <p class="writing-deck">Where hashes belong in immutable and distributed systems.</p>
+        <p class="writing-lead">
+          A hash is easy to add and difficult to define. The design becomes stable only when
+          the system names the identity, guarantee, trust boundary, and component that owns
+          verification and migration.
+        </p>
+        <div class="writing-meta" aria-label="Article metadata">
+          <span>Software architecture</span>
+          <span>Merkle trees</span>
+          <span>Content addressing</span>
+          <span>Stable digests</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="shell writing-section" aria-labelledby="start-with-decision">
+      <div class="writing-intro-grid">
+        <div>
+          <p class="section-index">01 / The decision</p>
+          <h2 id="start-with-decision">Put the digest where its promise and lifecycle live.</h2>
+        </div>
+        <div class="writing-copy">
+          <p>
+            A field called <code>digest</code> can begin as local memoization. Then a
+            serializer includes it, a database indexes it, another service recomputes it,
+            or a signature covers it. The bytes have crossed from implementation detail
+            into identity protocol without anyone naming the transition.
+          </p>
+          <p>
+            The safe default is to keep domain values free of digest policy. Fully derived
+            private caches may remain close to immutable data. Cross-system content
+            identity belongs in a versioned technical envelope. Roots, proofs, and repair
+            indexes belong to structures with their own lifecycle. A revision, ETag, or
+            dependency graph is often enough when the job is only change detection.
+          </p>
+        </div>
+      </div>
+
+      <nav class="decision-grid" aria-label="Field guide sections">
+        {
+          decisions.map((decision) => (
+            <a class="decision-card" href={decision.href}>
+              <span>{decision.number}</span>
+              <h3>{decision.title}</h3>
+              <p>{decision.summary}</p>
+            </a>
+          ))
+        }
+      </nav>
+    </section>
+
+    <section class="writing-band">
+      <div class="shell boundary-flow" aria-label="Digest placement decision flow">
+        <div>
+          <span>01 / Guarantee</span>
+          <strong>What must survive?</strong>
+          <p>Change · identity · repair · proof</p>
+        </div>
+        <div>
+          <span>02 / Unit</span>
+          <strong>Name the comparison</strong>
+          <p>Object · bytes · graph · range · statement</p>
+        </div>
+        <div>
+          <span>03 / Trust</span>
+          <strong>Locate the boundary</strong>
+          <p>Local · cross-system · untrusted</p>
+        </div>
+        <div>
+          <span>04 / Lifecycle</span>
+          <strong>Assign the owner</strong>
+          <p>Update · verify · rebuild · migrate</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell writing-section prose-section" id="object-ownership">
+      <p class="section-index">02 / Object ownership</p>
+      <h2>A private hash can live inside an immutable object.</h2>
+      <div class="writing-copy writing-copy-wide">
+        <p>
+          OpenJDK's current <code>String</code> implementation stores private
+          <code>hash</code> and <code>hashIsZero</code> fields and calculates the hash
+          lazily. The cache sits inside an immutable instance while remaining outside the
+          public string representation
+          (<a
+            href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/String.java"
+            target="_blank"
+            rel="noreferrer">OpenJDK source ↗</a
+          >).
+        </p>
+        <blockquote>Physical storage does not determine semantic ownership.</blockquote>
+        <p>
+          A private cache is plausible when it is completely derived, correctly published,
+          replaceable, and invisible to equality, serialization, and public identity.
+          Immutability helps with invalidation. It does not decide which fields are hashed,
+          what order means, which representation is canonical, who verifies received data,
+          or how another algorithm replaces the current one.
+        </p>
+        <div class="contract-table" role="region" aria-label="Digest ownership classifications" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th>Classification</th>
+                <th>Promise</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Private cache</td>
+                <td>Avoid repeated local work without changing public semantics</td>
+                <td>Object implementation or runtime</td>
+              </tr>
+              <tr>
+                <td>Technical identity</td>
+                <td>Name and verify a defined representation across a boundary</td>
+                <td>Storage, protocol, or integration layer</td>
+              </tr>
+              <tr>
+                <td>Domain identity</td>
+                <td>Make the digest itself part of an explicit public contract</td>
+                <td>Domain model and product contract</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell writing-section prose-section" id="different-contracts">
+      <p class="section-index">03 / Mechanism</p>
+      <h2>Similar hash diagrams hide different contracts.</h2>
+      <div class="writing-copy writing-copy-wide">
+        <p>
+          Recursive derived values appear in several established mechanisms. The useful
+          name follows what a consumer may conclude, not the visual shape of the tree.
+        </p>
+        <div class="mechanism-grid">
+          <article>
+            <span>Local computation</span>
+            <h3>Cached annotation</h3>
+            <p>A subtree stores a derived measure. The defining failure is stale state.</p>
+          </article>
+          <article>
+            <span>Controlled reuse</span>
+            <h3>Hash-consing</h3>
+            <p>Constructors and a table reuse structurally equal values within a bounded context.</p>
+          </article>
+          <article>
+            <span>Representation identity</span>
+            <h3>Content ID</h3>
+            <p>A defined representation receives an address that consumers can verify.</p>
+          </article>
+          <article>
+            <span>Structural commitment</span>
+            <h3>Merkle root</h3>
+            <p>Leaves or child references bind to a root under one exact tree definition.</p>
+          </article>
+          <article class="risk-card">
+            <span>Authenticated evidence</span>
+            <h3>Proof and trusted root</h3>
+            <p>A compact proof becomes meaningful only against a root the verifier trusts.</p>
+          </article>
+        </div>
+        <p>
+          Git computes object IDs from type and content and lets compound objects reference
+          child IDs
+          (<a href="https://git-scm.com/docs/gitdatamodel.html" target="_blank" rel="noreferrer"
+            >Git data model ↗</a
+          >). CIDv1 makes version, codec, algorithm, and digest length explicit
+          (<a href="https://specs.ipfs.tech/cid/" target="_blank" rel="noreferrer"
+            >CID specification ↗</a
+          >). Certificate Transparency defines tree construction, proof algorithms, and
+          signed tree information
+          (<a href="https://www.rfc-editor.org/rfc/rfc9162.html" target="_blank" rel="noreferrer"
+            >RFC 9162 ↗</a
+          >).
+        </p>
+        <p>
+          Those examples do not create one universal value-object API. Git is a
+          version-control object store. A CID does not supply authenticity, authorization,
+          or business equality. A valid proof checked against an untrusted root remains
+          untrusted.
+        </p>
+      </div>
+    </section>
+
+    <section class="shell writing-section prose-section" id="stable-protocol">
+      <p class="section-index">04 / Protocol</p>
+      <h2>A stable digest is a versioned protocol.</h2>
+      <div class="writing-copy writing-copy-wide">
+        <p>
+          Two services can use the same hash function and still disagree about identity.
+          One normalizes numbers, another preserves their lexical form. One omits defaults,
+          another includes them. One hashes received bytes, another decodes and re-encodes.
+        </p>
+        <p>
+          JCS defines deterministic JSON rules
+          (<a href="https://www.rfc-editor.org/rfc/rfc8785.html" target="_blank" rel="noreferrer"
+            >RFC 8785 ↗</a
+          >). CBOR needs a deterministic profile because several byte sequences can encode
+          the same abstract value
+          (<a href="https://www.rfc-editor.org/rfc/rfc8949.html" target="_blank" rel="noreferrer"
+            >RFC 8949 ↗</a
+          >). Canonicalization is necessary for portable serialized identity and still
+          leaves type, schema, tree shape, trust, verification, migration, and privacy to
+          define.
+        </p>
+
+        <ol class="protocol-list">
+          {
+            contractItems.map(([name, detail], index) => (
+              <li>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{name}</strong>
+                  <p>{detail}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+
+        <p>
+          A signed digest field can be authentic while the receiver never checks that it
+          matches the content. RFC 9421 describes this substitution boundary for HTTP
+          Message Signatures
+          (<a
+            href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.2.8"
+            target="_blank"
+            rel="noreferrer">section 7.2.8 ↗</a
+          >). The consumer must derive the digest from the data it actually accepts.
+        </p>
+        <p>
+          Git's SHA-256 transition covers object formats, references, signatures,
+          protocols, translation, and compatibility
+          (<a
+            href="https://git-scm.com/docs/hash-function-transition/2.52.0.html"
+            target="_blank"
+            rel="noreferrer">transition design ↗</a
+          >). A hash change in a content-addressed system is an identity migration rather
+          than a library upgrade.
+        </p>
+      </div>
+    </section>
+
+    <section class="shell writing-section prose-section" id="architecture-choice">
+      <p class="section-index">05 / Architecture</p>
+      <h2>The null hypothesis is often a revision.</h2>
+      <div class="writing-copy writing-copy-wide">
+        <p>
+          HTTP ETags validate resource representations without promising a globally
+          interpretable content identity
+          (<a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.8" target="_blank" rel="noreferrer"
+            >RFC 9110 ↗</a
+          >). Salsa uses revisions and dependency tracking for incremental recomputation
+          (<a href="https://salsa-rs.github.io/salsa/reference/algorithm.html" target="_blank" rel="noreferrer"
+            >Salsa algorithm ↗</a
+          >). Both demonstrate smaller contracts for narrower jobs.
+        </p>
+        <div class="contract-table" role="region" aria-label="Digest architecture choices" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th>Comparison unit</th>
+                <th>Likely starting point</th>
+                <th>Main rejection condition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Small local value</td>
+                <td>Direct comparison, revision, or private cache</td>
+                <td>External consumers reinterpret local state as public identity</td>
+              </tr>
+              <tr>
+                <td>Stable representation</td>
+                <td>Versioned Content ID</td>
+                <td>Canonicalization, verification, migration, or privacy is undefined</td>
+              </tr>
+              <tr>
+                <td>Replica key range</td>
+                <td>External Merkle repair index</td>
+                <td>The root can become stale relative to the indexed data</td>
+              </tr>
+              <tr>
+                <td>Verifiable statement</td>
+                <td>Protocol-specific tree and authenticated root</td>
+                <td>Root trust, proof verification, or replay policy is missing</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Amazon Dynamo used separate Merkle trees per key range for anti-entropy and
+          documented historical rebuild and bootstrapping costs
+          (<a
+            href="https://cdn.amazon.science/ac/1d/eb50c4064c538c8ac440ce6a1d91/dynamo-amazons-highly-available-key-value-store.pdf"
+            target="_blank"
+            rel="noreferrer">Dynamo paper ↗</a
+          >). Current Cassandra documentation describes trade-offs among tree resolution,
+          memory, repair duration, and overstreaming
+          (<a
+            href="https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html"
+            target="_blank"
+            rel="noreferrer">Cassandra architecture ↗</a
+          >).
+        </p>
+        <p>
+          Merkle synchronization moves comparison work. It does not remove node creation,
+          history, rebuild, storage, or garbage-collection costs. Without a target
+          workload, a fixed-size digest comparison cannot establish a universal
+          performance advantage.
+        </p>
+      </div>
+    </section>
+
+    <section class="writing-band closing-band">
+      <div class="shell writing-close">
+        <div>
+          <p class="eyebrow">Architecture decision</p>
+          <h2>Name the promise before choosing the hash.</h2>
+        </div>
+        <div>
+          <p>
+            Keep local caches private. Put representation identity into a versioned
+            technical envelope. Put range reconciliation into a repair index. Put proofs
+            beside their authenticated root and policy. Leave the digest out when a
+            revision or direct comparison carries the required guarantee.
+          </p>
+          <a class="button button-primary" href="https://www.linkedin.com/in/vitalijhein" target="_blank" rel="noreferrer">
+            Discuss the architecture ↗
+          </a>
+        </div>
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .writing-article {
+    --writing-max: 920px;
+  }
+
+  .writing-hero {
+    padding-block: clamp(5.5rem, 11vw, 9rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .writing-hero h1 {
+    max-width: 980px;
+    margin: 1.15rem 0 0;
+    font-size: clamp(4.2rem, 11vw, 9rem);
+    font-weight: 630;
+    line-height: 0.88;
+    letter-spacing: -0.075em;
+  }
+
+  .writing-deck {
+    max-width: 900px;
+    margin: 2rem 0 0;
+    color: var(--ink);
+    font-size: clamp(1.55rem, 3.5vw, 2.7rem);
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+  }
+
+  .writing-lead {
+    max-width: 760px;
+    margin: 2rem 0 0;
+    color: #bdc9d5;
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+  }
+
+  .writing-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 2.2rem;
+  }
+
+  .writing-meta span {
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font: 0.66rem/1.2 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .writing-section {
+    padding-block: clamp(4.5rem, 9vw, 7.5rem);
+  }
+
+  .writing-intro-grid,
+  .writing-close {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(2.5rem, 7vw, 7rem);
+  }
+
+  .writing-section h2,
+  .writing-close h2 {
+    max-width: 900px;
+    margin: 1rem 0 0;
+    font-size: clamp(2.3rem, 5.2vw, 4.8rem);
+    font-weight: 620;
+    line-height: 1;
+    letter-spacing: -0.055em;
+  }
+
+  .writing-copy {
+    max-width: var(--writing-max);
+    color: #c6d0da;
+    font-size: 1.08rem;
+  }
+
+  .writing-copy-wide {
+    margin-top: 2.2rem;
+  }
+
+  .writing-copy p {
+    margin: 0;
+  }
+
+  .writing-copy p + p {
+    margin-top: 1.4rem;
+  }
+
+  .writing-copy a {
+    color: var(--ink);
+  }
+
+  .writing-copy code {
+    padding: 0.08rem 0.28rem;
+    border: 1px solid var(--line);
+    color: var(--cyan);
+    background: var(--base-soft);
+    font: 0.88em/1.4 var(--mono);
+  }
+
+  .writing-copy blockquote {
+    margin: 2.5rem 0;
+    padding: 1.4rem 0 1.4rem 1.5rem;
+    border-left: 4px solid var(--coral);
+    color: var(--ink);
+    font-size: clamp(1.45rem, 3vw, 2.15rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .decision-grid,
+  .mechanism-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 3.5rem;
+  }
+
+  .decision-card,
+  .mechanism-grid article {
+    min-height: 230px;
+    padding: 1.4rem;
+    border: 1px solid var(--line);
+    background: rgba(10, 23, 39, 0.72);
+  }
+
+  .decision-card {
+    text-decoration: none;
+  }
+
+  .decision-card > span,
+  .mechanism-grid span,
+  .boundary-flow span {
+    color: var(--cyan);
+    font: 0.68rem/1.4 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .decision-card h3,
+  .mechanism-grid h3 {
+    margin: 2.4rem 0 0;
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .decision-card p,
+  .mechanism-grid p {
+    margin: 0.8rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .writing-band {
+    border-block: 1px solid var(--line);
+    background: rgba(5, 13, 24, 0.6);
+  }
+
+  .boundary-flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding-block: 2.5rem;
+  }
+
+  .boundary-flow > div {
+    padding: 1.2rem 1.4rem;
+    border-left: 1px solid var(--line);
+  }
+
+  .boundary-flow > div:last-child {
+    border-right: 1px solid var(--line);
+  }
+
+  .boundary-flow strong {
+    display: block;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .boundary-flow p {
+    margin: 0.55rem 0 0;
+    color: var(--faint);
+    font-size: 0.78rem;
+  }
+
+  .prose-section {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mechanism-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block: 2.5rem;
+  }
+
+  .mechanism-grid article {
+    min-height: 205px;
+  }
+
+  .mechanism-grid .risk-card {
+    border-color: rgba(255, 111, 125, 0.6);
+  }
+
+  .mechanism-grid .risk-card span {
+    color: var(--coral);
+  }
+
+  .contract-table {
+    margin-block: 2.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+  }
+
+  .contract-table table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+  }
+
+  .contract-table th,
+  .contract-table td {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .contract-table th {
+    color: var(--cyan);
+    background: rgba(10, 23, 39, 0.9);
+    font: 0.68rem/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .contract-table td:first-child {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .protocol-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin: 2.8rem 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .protocol-list li {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 0.8rem;
+    padding: 1.25rem 1rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .protocol-list li > span {
+    color: var(--coral);
+    font: 0.68rem/1.5 var(--mono);
+  }
+
+  .protocol-list strong {
+    color: var(--ink);
+  }
+
+  .protocol-list p {
+    margin-top: 0.35rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .closing-band {
+    padding-block: clamp(4.5rem, 9vw, 7rem);
+  }
+
+  .writing-close p {
+    max-width: 760px;
+    margin: 0;
+    color: #bdc9d5;
+    font-size: 1.08rem;
+  }
+
+  .writing-close .button {
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .writing-intro-grid,
+    .writing-close {
+      grid-template-columns: 1fr;
+    }
+
+    .decision-grid,
+    .mechanism-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .boundary-flow {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .boundary-flow > div:nth-child(2) {
+      border-right: 1px solid var(--line);
+    }
+
+    .protocol-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .writing-hero h1 {
+      font-size: clamp(3.5rem, 20vw, 5.5rem);
+    }
+
+    .decision-grid,
+    .mechanism-grid,
+    .boundary-flow {
+      grid-template-columns: 1fr;
+    }
+
+    .decision-card {
+      min-height: auto;
+    }
+
+    .boundary-flow > div,
+    .boundary-flow > div:nth-child(2) {
+      border-right: 1px solid var(--line);
+    }
+  }
+</style>

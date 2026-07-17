@@ -103,6 +103,10 @@ jobs:
             assert(/<meta name="description" content="[^"]+">/.test(html), `${file}: missing description`);
             assert(/<meta property="og:title" content="[^"]+">/.test(html), `${file}: missing OG title`);
             assert(/<meta property="og:description" content="[^"]+">/.test(html), `${file}: missing OG description`);
+            // Site artifact rule: no em or en dashes in rendered copy. Scoped
+            // per page (not the whole dist tree) because vendored JS chunks may
+            // legitimately contain them; U+2026 ellipsis stays allowed.
+            assert(!/[–—]/.test(html), `${file}: rendered page contains an em or en dash`);
 
             const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
             assert(match, `${file}: missing Person JSON-LD`);

@@ -119,11 +119,7 @@ export function rehypeMermaidA11y() {
 
     let count = 0;
     walk(tree, (node, parent) => {
-      if (
-        isElement(node, "svg") &&
-        parent &&
-        insideMermaidFigureWrapper(parent)
-      ) {
+      if (isElement(node, "svg") && parent && insideMermaidFigure(parent)) {
         count += 1;
         node.properties = node.properties || {};
         node.properties.role = "img";
@@ -131,10 +127,4 @@ export function rehypeMermaidA11y() {
       }
     });
   };
-}
-
-function insideMermaidFigureWrapper(parent) {
-  return (
-    isElement(parent, "div") && classList(parent).includes("mermaid-rendered")
-  );
 }

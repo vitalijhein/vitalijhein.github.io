@@ -220,35 +220,13 @@ a:hover {
 
 .system-map {
   position: relative;
-  min-height: 450px;
   border: 1px solid var(--line);
+  padding: 3.4rem 1.4rem 1.4rem;
   background: linear-gradient(
     135deg,
     rgba(65, 216, 245, 0.06),
     transparent 55%
   );
-  overflow: hidden;
-}
-
-.system-map::before,
-.system-map::after {
-  position: absolute;
-  content: "";
-  background: var(--line-strong);
-}
-
-.system-map::before {
-  top: 50%;
-  left: 12%;
-  width: 76%;
-  height: 1px;
-}
-
-.system-map::after {
-  top: 12%;
-  left: 50%;
-  width: 1px;
-  height: 76%;
 }
 
 .map-caption {
@@ -261,45 +239,48 @@ a:hover {
   text-transform: uppercase;
 }
 
-.map-node {
-  position: absolute;
-  z-index: 2;
-  display: grid;
-  min-width: 108px;
-  min-height: 48px;
-  place-items: center;
-  border: 1px solid var(--line-strong);
-  background: var(--base-soft);
-  color: var(--muted);
-  font: 600 0.65rem/1 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.delivery-flow {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.node-problem {
-  top: 22%;
-  left: 10%;
+.delivery-flow .flow-node {
+  fill: var(--base-soft);
+  stroke: var(--line-strong);
+  stroke-width: 1;
 }
-.node-architecture {
-  top: 22%;
-  right: 8%;
+
+.delivery-flow .flow-label {
+  fill: var(--muted);
+  font: 600 13px var(--mono);
+  letter-spacing: 1px;
+  text-anchor: middle;
 }
-.node-engineering {
-  bottom: 19%;
-  left: 9%;
+
+.delivery-flow .flow-edge {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  marker-end: url(#flow-arrow);
 }
-.node-verification {
-  right: 8%;
-  bottom: 19%;
+
+.delivery-flow .flow-feedback {
+  stroke-dasharray: 4 4;
 }
-.node-delivery {
-  top: 50%;
-  left: 50%;
-  min-width: 126px;
-  transform: translate(-50%, -50%);
-  border-color: var(--cyan);
-  color: var(--cyan);
-  box-shadow: 0 0 35px rgba(65, 216, 245, 0.1);
+
+.delivery-flow .flow-arrowhead {
+  fill: var(--line-strong);
+}
+
+.delivery-flow .flow-node-production {
+  fill: var(--cyan-soft);
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 18px rgba(65, 216, 245, 0.25));
+}
+
+.delivery-flow .flow-label-production {
+  fill: var(--cyan);
 }
 
 .proof-band {
@@ -970,7 +951,7 @@ a:hover {
     min-height: auto;
   }
   .system-map {
-    min-height: 360px;
+    max-width: 460px;
   }
   .proof-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1055,22 +1036,6 @@ a:hover {
   .method-grid,
   .background-grid {
     grid-template-columns: 1fr;
-  }
-  .system-map {
-    min-height: 330px;
-  }
-  .map-node {
-    min-width: 92px;
-    min-height: 42px;
-    font-size: 0.58rem;
-  }
-  .node-problem,
-  .node-engineering {
-    left: 5%;
-  }
-  .node-architecture,
-  .node-verification {
-    right: 5%;
   }
   .footer-grid {
     grid-template-columns: 1fr;

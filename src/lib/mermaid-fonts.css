@@ -1,0 +1,10 @@
+/* Loaded into the build-time Mermaid render context (rehype-mermaid `css`
+   option) so text measurement uses the same IBM Plex Sans the site serves. */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url("../assets/fonts/ibm-plex-sans-latin-wght-normal.woff2")
+    format("woff2");
+}

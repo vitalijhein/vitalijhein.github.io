@@ -1,7 +1,6 @@
 ---
 import { getCollection, render, type CollectionEntry } from "astro:content";
 
-import MermaidDiagrams from "../../components/MermaidDiagrams.astro";
 import { getCaseMeta, getOrderedCases } from "../../data/caseStudies";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
@@ -54,7 +53,6 @@ const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
 
     <article class="case-prose">
       <Content />
-      <MermaidDiagrams />
       <footer class="case-source-footer">
         <p>This case study is maintained in the canonical public evidence repository.</p>
         <a class="button" href={meta.sourceUrl} target="_blank" rel="noreferrer">

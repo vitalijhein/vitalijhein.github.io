@@ -1,7 +1,46 @@
+import { unified } from "@astrojs/markdown-remark";
 import { defineConfig, fontProviders } from "astro/config";
+import rehypeMermaid from "rehype-mermaid";
+
+import {
+  rehypeMermaidA11y,
+  rehypeMermaidSourceDetails,
+} from "./src/lib/rehype-mermaid-wrap.mjs";
 
 export default defineConfig({
   site: "https://vitalijhein.github.io",
+  markdown: {
+    syntaxHighlight: { type: "shiki", excludeLangs: ["mermaid"] },
+    processor: unified({
+      rehypePlugins: [
+        rehypeMermaidSourceDetails,
+        [
+          rehypeMermaid,
+          {
+            strategy: "inline-svg",
+            css: new URL("./src/lib/mermaid-fonts.css", import.meta.url),
+            mermaidConfig: {
+              securityLevel: "strict",
+              theme: "base",
+              themeVariables: {
+                background: "#0a1727",
+                primaryColor: "#0d263d",
+                primaryTextColor: "#e9f0f7",
+                primaryBorderColor: "#41d8f5",
+                lineColor: "#9eabba",
+                secondaryColor: "#311b29",
+                tertiaryColor: "#07111f",
+                fontFamily:
+                  'var(--font-sans), "IBM Plex Sans", "Segoe UI", sans-serif',
+              },
+              flowchart: { curve: "basis", htmlLabels: false },
+            },
+          },
+        ],
+        rehypeMermaidA11y,
+      ],
+    }),
+  },
   fonts: [
     {
       provider: fontProviders.local(),

@@ -32,6 +32,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Chromium for build-time Mermaid rendering
+        run: npx playwright install --with-deps chromium
+
       - name: Check formatting and types
         run: |
           npm run format:check
@@ -150,6 +159,20 @@ jobs:
           for (const sourceFile of sourceFiles) {
             const markdown = fs.readFileSync(`${sourceDirectory}/${sourceFile}`, "utf8");
             assert(!/<(?:script|iframe|object|embed)\b|on[a-z]+\s*=/i.test(markdown), `${sourceFile}: unsafe raw markup`);
+
+            // Build-time Mermaid renders silently drop the whole article body when a
+            // diagram fails; assert every fence became a labeled inline SVG so a
+            // swallowed render can never deploy.
+            const slug = sourceFile.replace(/\.md$/, "");
+            const pageFile = `dist/work/${slug}/index.html`;
+            const pageHtml = fs.readFileSync(pageFile, "utf8");
+            const fenceCount = (markdown.match(/^```mermaid/gm) || []).length;
+            const svgCount = (pageHtml.match(/<svg[^>]*aria-label="Diagram /g) || []).length;
+            const detailsCount = (pageHtml.match(/<details class="mermaid-source-details">/g) || []).length;
+            assert(svgCount === fenceCount, `${pageFile}: expected ${fenceCount} rendered diagrams, found ${svgCount}`);
+            assert(detailsCount === fenceCount, `${pageFile}: expected ${fenceCount} diagram source disclosures, found ${detailsCount}`);
+            const article = pageHtml.match(/<article class="case-prose">([\s\S]*?)<footer/);
+            assert(article && article[1].length > 2000, `${pageFile}: case body is missing or suspiciously small`);
           }
 
           console.log("Generated-site integrity checks passed.");
@@ -245,10 +268,10 @@ jobs:
           }
           NODE
 
-      - name: Build and upload Pages artifact
-        uses: withastro/action@v6
+      - name: Upload validated site as Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          node-version: 24
+          path: dist
 
   deploy:
     needs: build

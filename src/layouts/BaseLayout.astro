@@ -1,4 +1,6 @@
 ---
+import { Font } from "astro:assets";
+
 import "../styles/global.css";
 
 interface Props {
@@ -56,6 +58,8 @@ const personSchema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
     <meta name="theme-color" content="#07111f" />

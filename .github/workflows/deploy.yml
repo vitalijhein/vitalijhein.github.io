@@ -75,6 +75,10 @@ jobs:
             if (!condition) throw new Error(message);
           }
 
+          // Real case bodies run 70k+ chars; this floor exists because a failed
+          // diagram render empties the body while astro build still exits 0.
+          const MIN_CASE_BODY_CHARS = 2000;
+
           function artifactPath(href) {
             const path = href.split("#", 1)[0].split("?", 1)[0];
             if (path === "" || path === "/") return "dist/index.html";
@@ -147,6 +151,18 @@ jobs:
           assert(JSON.stringify(sitemapUrls) === JSON.stringify(indexedUrls), "sitemap route set mismatch");
           assert(!sitemap.includes("404"), "sitemap must not include 404");
 
+          // Self-hosted fonts are referenced from inline CSS url() rules, which
+          // the href-only link check above cannot see; assert them directly.
+          const fontDir = "dist/_astro/fonts";
+          const fontFiles = new Set(fs.readdirSync(fontDir).filter((name) => name.endsWith(".woff2")));
+          assert(fontFiles.size === 4, `expected 4 self-hosted woff2 files, found ${fontFiles.size}`);
+          for (const [file] of pages) {
+            const html = fs.readFileSync(file, "utf8");
+            for (const [, fontName] of html.matchAll(/url\("\/_astro\/fonts\/([^"]+)"\)/g)) {
+              assert(fontFiles.has(fontName), `${file}: references missing font asset ${fontName}`);
+            }
+          }
+
           const artifact = readTextTree("dist");
           const forbidden = /\/Users\/|127\.0\.0\.1|localhost|\b(?:TCT|Bitget|trading|salary|gehalt|bullshit|Festo)\b|(?:ghp_|github_pat_|sk-)[A-Za-z0-9_-]{16,}|(?:ANTHROPIC|OPENAI|AZURE|CEREBRAS)_API_KEY|client[_-]?secret|tenant[_-]?id/i;
           assert(!forbidden.test(artifact), "generated HTML contains a forbidden or private identifier");
@@ -176,7 +192,7 @@ jobs:
             assert(svgCount === fenceCount, `${pageFile}: expected ${fenceCount} rendered diagrams, found ${svgCount}`);
             assert(detailsCount === fenceCount, `${pageFile}: expected ${fenceCount} diagram source disclosures, found ${detailsCount}`);
             const article = pageHtml.match(/<article class="case-prose">([\s\S]*?)<footer/);
-            assert(article && article[1].length > 2000, `${pageFile}: case body is missing or suspiciously small`);
+            assert(article && article[1].length > MIN_CASE_BODY_CHARS, `${pageFile}: case body is missing or suspiciously small`);
           }
 
           console.log("Generated-site integrity checks passed.");

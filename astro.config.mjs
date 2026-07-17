@@ -31,7 +31,7 @@ export default defineConfig({
                 secondaryColor: "#311b29",
                 tertiaryColor: "#07111f",
                 fontFamily:
-                  'var(--font-sans), "IBM Plex Sans", "Segoe UI", sans-serif',
+                  'var(--font-sans, "IBM Plex Sans", "Segoe UI", sans-serif)',
               },
               flowchart: { curve: "basis", htmlLabels: false },
             },

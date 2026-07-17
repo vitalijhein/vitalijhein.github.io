@@ -1,4 +1,5 @@
 ---
+import { DIGEST_BOUNDARY_FRESHNESS } from "../../data/writing";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const title = "Writing | Vitalij Hein";
@@ -28,7 +29,7 @@ const description =
 
     <a class="writing-row" href="/writing/the-digest-boundary/">
       <p class="writing-row-kicker">
-        Architecture field guide / Current through 2026-07-16
+        Architecture field guide / {DIGEST_BOUNDARY_FRESHNESS}
       </p>
       <h3>The Digest Boundary</h3>
       <p class="writing-row-deck">

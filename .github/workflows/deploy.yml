@@ -57,6 +57,7 @@ jobs:
             ["dist/work/csharp-rag-latency-engine/index.html", `${origin}/work/csharp-rag-latency-engine/`, "index, follow"],
             ["dist/work/mirror-os/index.html", `${origin}/work/mirror-os/`, "index, follow"],
             ["dist/work/content-engine/index.html", `${origin}/work/content-engine/`, "index, follow"],
+            ["dist/writing/index.html", `${origin}/writing/`, "index, follow"],
             ["dist/writing/the-digest-boundary/index.html", `${origin}/writing/the-digest-boundary/`, "index, follow"],
             ["dist/404.html", `${origin}/404.html`, "noindex, follow"],
           ];
@@ -195,6 +196,7 @@ jobs:
             "csharp-rag|/work/csharp-rag-latency-engine/"
             "mirror-os|/work/mirror-os/"
             "content-engine|/work/content-engine/"
+            "writing|/writing/"
             "digest-boundary|/writing/the-digest-boundary/"
             "not-found|/404.html"
           )
@@ -224,6 +226,7 @@ jobs:
             "csharp-rag",
             "mirror-os",
             "content-engine",
+            "writing",
             "digest-boundary",
             "not-found",
           ]) {

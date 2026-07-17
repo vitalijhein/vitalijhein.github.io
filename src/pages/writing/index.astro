@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const title = "Writing | Vitalij Hein";
+const description =
+  "Long-form writing on architecture boundaries and system guarantees, starting with where digests belong in immutable and distributed systems.";
+---
+
+<BaseLayout title={title} description={description} pageClass="writing-index-page">
+  <section class="page-intro">
+    <div class="shell">
+      <p class="eyebrow">Writing / Long-form field guides</p>
+      <h1>Decisions worth writing down.</h1>
+      <p class="lead">
+        Long-form writing on architecture boundaries and system guarantees.
+        Each piece is a decision guide drawn from systems that had to work.
+      </p>
+    </div>
+  </section>
+
+  <section class="shell section" aria-labelledby="writing-list">
+    <div class="section-heading">
+      <p class="section-index">01 / Published</p>
+      <div>
+        <h2 id="writing-list">Start with the boundary.</h2>
+      </div>
+    </div>
+
+    <a class="writing-row" href="/writing/the-digest-boundary/">
+      <p class="writing-row-kicker">
+        Architecture field guide / Current through 2026-07-16
+      </p>
+      <h3>The Digest Boundary</h3>
+      <p class="writing-row-deck">
+        Where hashes belong in immutable and distributed systems: private cached
+        hashes, Content IDs, Merkle repair indexes, authenticated trees,
+        revisions, or no digest at all.
+      </p>
+      <div class="writing-row-footer">
+        <span>Software architecture · Merkle trees · Content addressing</span>
+        <span>Read the field guide →</span>
+      </div>
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .writing-row {
+    display: block;
+    padding: clamp(1.6rem, 4vw, 2.6rem);
+    border: 1px solid var(--line);
+    background: rgba(10, 23, 39, 0.78);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .writing-row:hover {
+    color: var(--ink);
+    border-color: rgba(65, 216, 245, 0.62);
+    background: rgba(16, 39, 61, 0.96);
+  }
+
+  .writing-row-kicker {
+    margin: 0;
+    color: var(--cyan);
+    font: 600 0.7rem/1.4 var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .writing-row h3 {
+    margin: 0.9rem 0 0.7rem;
+    color: var(--ink);
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    font-weight: 620;
+    letter-spacing: -0.02em;
+  }
+
+  .writing-row-deck {
+    max-width: 720px;
+    margin: 0 0 1.6rem;
+    line-height: 1.6;
+  }
+
+  .writing-row-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.6rem;
+    color: var(--faint);
+    font: 600 0.7rem/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>
